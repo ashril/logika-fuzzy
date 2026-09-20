@@ -72,18 +72,16 @@ Dengan titik:
 
 Gunakan persamaan garis:
 
+
+
 $$
-\frac{y-y_1}{y_2-y_1}
-=
-\frac{x-x_1}{x_2-x_1}
+\frac{y-y_1}{y_2-y_1}=\frac{x-x_1}{x_2-x_1}
 $$
 
 Substitusi:
 
 $$
-\frac{y-0}{1-0}
-=
-\frac{x-10}{15-10}
+\frac{y-0}{1-0}=\frac{x-10}{15-10}
 $$
 
 Sehingga:
@@ -118,9 +116,7 @@ Dengan titik:
 Gunakan persamaan garis:
 
 $$
-\frac{y-1}{0-1}
-=
-\frac{x-15}{20-15}
+\frac{y-1}{0-1}=\frac{x-15}{20-15}
 $$
 
 Sehingga:
