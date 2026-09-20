@@ -799,10 +799,7 @@ Buat fungsi fuzzy untuk semua variabel usia yang ada pada Tugas 1 Anda, lakukan 
 ## Tugas Praktikum 1 — Verifikasi Fungsi
 
 Hitung secara manual nilai keanggotaan --> Sudah dilakukan pada Tugas 1.
-Buat tabel dalam database
-
-## Tugas 2 — Pengujian Program
-
+Buat tabel berdasarkan jumlah variabel usia ke dalam database
 Jalankan program dengan minimal **2 usia di setiap variabel usia** yang berbeda.
 
 Catat hasilnya:
@@ -826,33 +823,23 @@ Catat hasilnya:
 
 Jawab pertanyaan berikut.
 
-### 1.
+### 1. Mengapa database tidak menyimpan semua nilai derajat keanggotaan?
 
-Mengapa database tidak menyimpan semua nilai derajat keanggotaan?
-
-### 2.
-
-Apa fungsi dari kolom:
+### 2. Apa fungsi dari kolom:
 
 ```text
 usia_min
 ```
 
-### 3.
-
-Apa fungsi dari kolom:
+### 3. Apa fungsi dari kolom:
 
 ```text
 usia_max
 ```
 
-### 4.
+### 4. Mengapa `nilai_fuzzy` menggunakan tipe data `VARCHAR`?
 
-Mengapa `nilai_fuzzy` menggunakan tipe data `VARCHAR`?
-
-### 5.
-
-Apa yang terjadi ketika nilai crisp `17` diberikan kepada program?
+### 5. Apa yang terjadi ketika nilai crisp `17` diberikan kepada program?
 
 Jelaskan prosesnya mulai dari:
 
@@ -860,9 +847,7 @@ Jelaskan prosesnya mulai dari:
 Input → Database → Fungsi Python → Hasil
 ```
 
-### 6.
-
-Apa yang terjadi jika database memberikan:
+### 6. Apa yang terjadi jika database memberikan:
 
 ```text
 fungsi_remaja_turun
@@ -870,13 +855,9 @@ fungsi_remaja_turun
 
 tetapi fungsi tersebut tidak dibuat di Python?
 
-### 7.
+### 7. Mengapa pada praktikum ini tidak digunakan library SEPERTI `scikit-fuzzy`?
 
-Mengapa pada praktikum ini tidak digunakan library `scikit-fuzzy`?
-
-### 8.
-
-Apa hubungan antara persamaan garis lurus yang dihitung secara manual dengan fungsi Python?
+### 8. Apa hubungan antara persamaan garis lurus yang dihitung secara manual dengan fungsi Python?
 
 
 # U. Ketentuan Praktikum
