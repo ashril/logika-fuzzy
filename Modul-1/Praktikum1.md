@@ -46,7 +46,7 @@ Fungsi tersebut mempunyai tiga bagian:
 
 # C. Menghitung Fungsi Keanggotaan Secara Manual
 > **Catatan penting:**
-> Ini hanya contoh saja, pada saat praktikum, gunakan sesuai dengan fungsi yang Anda buat pada Tugas 1 atau Tugas 1 yang sudah Anda perbaiki
+> Ini hanya contoh saja, pada saat praktikum, gunakan sesuai dengan fungsi yang Anda buat pada Tugas 2 Anda
 
 Misalkan fungsi keanggotaan **Remaja** ditentukan oleh titik:
 
