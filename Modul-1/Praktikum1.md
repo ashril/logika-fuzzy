@@ -78,6 +78,7 @@ $$
 $$
 
 Contoh untuk penilaian *Layanan Memuaskan* dengan skala rating $1 \le x \le 5$ dan batas ambang $\theta = 4.0$:
+
 $$
 \chi_{\text{Memuaskan}}(x) = 
 \begin{cases} 
