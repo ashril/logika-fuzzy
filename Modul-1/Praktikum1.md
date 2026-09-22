@@ -69,7 +69,13 @@ Sering terjadi kesalahpahaman antara derajat keanggotaan fuzzy dan teori probabi
 ### 1. Fungsi Karakteristik Himpunan Crisp
 Misalkan semesta pembicaraan adalah $X$. Suatu himpunan crisp $A$ didefinisikan oleh fungsi karakteristik $\chi_A(x)$:
 
-$$\chi_A(x) = \begin{cases} 1, & \text{jika } x \in A \\ 0, & \text{jika } x \notin A \end{cases}$$
+$$
+\chi_A(x) =
+\begin{cases}
+1, & \text{jika } x \in A \\
+0, & \text{jika } x \notin A 
+\end{cases}
+$$
 
 Contoh untuk penilaian *Layanan Memuaskan* dengan skala rating $1 \le x \le 5$ dan batas ambang $\theta = 4.0$:
 $$\chi_{\text{Memuaskan}}(x) = \begin{cases} 1, & x \ge 4.0 \\ 0, & x < 4.0 \end{cases}$$
