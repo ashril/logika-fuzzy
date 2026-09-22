@@ -1,920 +1,259 @@
-# Praktikum Modul 1
-## Implementasi Fungsi Keanggotaan Fuzzy dengan MySQL dan Python
+# Praktikum 1 — Pengantar Logika Fuzzy dan Representasi Derajat Keanggotaan
+## Konsep Ketidakpastian, Logika Crisp vs Fuzzy, dan Visualisasi Derajat Keanggotaan dengan Python
+
+---
 
 ## A. Tujuan Praktikum
 Setelah menyelesaikan praktikum ini, mahasiswa diharapkan mampu:
-1. Memahami hubungan antara fungsi keanggotaan fuzzy dan persamaan matematika.
-2. Menghitung persamaan fungsi keanggotaan secara manual.
-3. Menyimpan interval fungsi keanggotaan ke dalam database MySQL.
-4. Menghubungkan Python dengan database MySQL.
-5. Mengambil informasi fungsi keanggotaan dari database.
-6. Menentukan fungsi yang harus digunakan berdasarkan nilai crisp.
-7. Mengeksekusi fungsi keanggotaan Python secara dinamis.
-8. Menghasilkan nilai derajat keanggotaan `μ(x)` tanpa menggunakan library fuzzy.
+1. Menjelaskan konsep ketidakpastian dalam pengambilan keputusan di bidang Teknologi Informasi.
+2. Membedakan secara matematis dan konseptual antara logika Boolean (crisp) dan logika fuzzy.
+3. Menjelaskan arti nilai derajat keanggotaan $\mu(x) \in [0, 1]$ dan membedakannya dari konsep probabilitas.
+4. Mengimplementasikan fungsi karakteristik crisp dan fungsi keanggotaan fuzzy menggunakan bahasa pemrograman Python.
+5. Memvisualisasikan perbandingan logika crisp dan fuzzy menggunakan pustaka `NumPy` dan `Matplotlib`.
+6. Menganalisis perilaku sistem pada kondisi batas (*boundary conditions*) dan menjelaskan keunggulan transisi halus (*smooth transition*) pada logika fuzzy.
 
-> **Catatan penting:**
-> Pada praktikum ini mahasiswa **tidak diperbolehkan menggunakan library fuzzy** seperti `scikit-fuzzy` untuk menghitung derajat keanggotaan.
-> Tujuan praktikum adalah memahami proses fuzzifikasi dari dasar, mulai dari persamaan matematika sampai implementasinya dalam Python.
-
-# B. Konsep Dasar
-
-Pada praktikum sebelumnya telah dipelajari bahwa fungsi keanggotaan fuzzy dapat dibentuk dari beberapa titik.
-Sebagai contoh, fungsi keanggotaan **Usia Remaja** berbentuk segitiga:
-
-```text
-μ(x)
-1.0                    ● (15,1)
-                      / \
-                     /   \
-                    /     \
-                   /       \
-                  /         \
-0.0 ─────────────●───────────●────────────────
-                 10          20
-
-                 Usia
-```
-
-Fungsi tersebut mempunyai tiga bagian:
-
-1. Bagian sebelum usia 10 tahun → derajat keanggotaan `0`.
-2. Bagian naik usia 10–15 tahun → menggunakan fungsi linear naik.
-3. Bagian turun usia 15–20 tahun → menggunakan fungsi linear turun.
-4. Bagian setelah usia 20 tahun → derajat keanggotaan `0`.
+> [!NOTE]
+> **Prasyarat Pengetahuan:** Dasar pemrograman Python (variabel, fungsi, percabangan), dasar array numerik, dan konsep himpunan matematika dasar.
 
 ---
 
-# C. Menghitung Fungsi Keanggotaan Secara Manual
-> **Catatan penting:**
-> Ini hanya contoh saja, pada saat praktikum, gunakan sesuai dengan fungsi yang Anda buat pada Tugas 2 Anda
+## B. Konsep Dasar
 
-Misalkan fungsi keanggotaan **Remaja** ditentukan oleh titik:
+### 1. Masalah Pengambilan Keputusan dalam Kondisi Ketidakpastian
+Dalam dunia nyata, khususnya pada bidang Teknologi Informasi, parameter sistem sering kali tidak dapat dikelompokkan secara kaku (*black-and-white*). Perhatikan contoh permasalahan berikut:
+- **Waktu Respons Server (*Response Time*):** Apakah waktu respons 3.9 detik dikategorikan *Cepat* atau *Lambat* jika ambang batas kaku ditetapkan pada 4.0 detik?
+- **Suhu Ruang Server (*Data Center Temperature*):** Jika batas dingin adalah $\le 20^\circ\text{C}$, apakah $20.1^\circ\text{C}$ otomatis dianggap *Panas*?
+- **Kualitas Layanan (*Quality of Service - QoS*):** Penilaian pengguna mengenai antarmuka aplikasi sering kali dinyatakan dengan ungkapan linguistik: *"sangat memuaskan"*, *"cukup baik"*, atau *"agak lambat"*.
 
-```text
-(10, 0)
-(15, 1)
-(20, 0)
-```
+Pendekatan konvensional menggunakan **Logika Crisp (Boolean)** yang hanya mengenal dua keadaan diskrit:
+$$\text{Nilai Keanggotaan} \in \{0, 1\} \quad (\text{SALAH / BENAR})$$
 
-## 1. Fungsi naik
-Fungsi naik berada pada interval:
-
-```text
-10 ≤ x ≤ 15
-```
-
-Dengan titik:
+Sebaliknya, **Logika Fuzzy**, yang diperkenalkan oleh **Prof. Lotfi A. Zadeh pada tahun 1965** di University of California, Berkeley, memperluas konsep tersebut sehingga suatu nilai dapat memiliki keanggotaan bertingkat:
+$$\text{Derajat Keanggotaan } \mu_A(x) \in [0, 1]$$
 
 ```text
-(x1, y1) = (10, 0)
-(x2, y2) = (15, 1)
+Logika Crisp (Tegas)            Logika Fuzzy (Samar / Fleksibel)
+Derajat                          Derajat
+  1.0 ──────┐                      1.0 ──────┐
+            │                                │\
+            │                                │ \
+            │                                │  \
+  0.0 ──────┴───────               0.0 ──────┴───\──────
+            Ambang                           Transisi Halus
 ```
 
-Gunakan persamaan garis:
+### 2. Perbedaan Logika Crisp dan Logika Fuzzy
 
+| Karakteristik | Logika Crisp / Boolean | Logika Fuzzy |
+|---|---|---|
+| **Rentang Nilai** | Biner: $\{0, 1\}$ | Kontinu: $[0.0, 1.0]$ |
+| **Batas Himpunan** | Kaku, terputus (*crisp boundary*) | Halus, bertahap (*gradual transition*) |
+| **Representasi Makna** | Hanya YA atau TIDAK | Sebagian benar, agak benar, sangat benar |
+| **Ketahanan Noise** | Rentan terhadap fluktuasi kecil di sekitar ambang | Stabil dan toleran terhadap variasi data input |
+| **Representasi Komputasi** | `bool` / `int` (0 atau 1) | `float` ($0.0 \le x \le 1.0$) |
 
-
-$$
-\frac{y-y_1}{y_2-y_1}=\frac{x-x_1}{x_2-x_1}
-$$
-
-Substitusi:
-
-$$
-\frac{y-0}{1-0}=\frac{x-10}{15-10}
-$$
-
-Sehingga:
-
-$$
-y = \frac{x-10}{5}
-$$
-
-Maka fungsi keanggotaan naik adalah:
-
-$$
-\boxed{\mu(x)=\frac{x-10}{5}}
-$$
+### 3. Derajat Keanggotaan vs Probabilitas
+Sering terjadi kesalahpahaman antara derajat keanggotaan fuzzy dan teori probabilitas:
+- **Probabilitas** mengukur *kemungkinan terjadinya suatu peristiwa acak di masa depan*, dengan syarat total peluang semesta peristiwa adalah 1 ($\sum P = 1$).
+- **Derajat Keanggotaan Fuzzy ($\mu$)** mengukur *tingkat kesesuaian data terhadap suatu konsep linguistik yang sudah terjadi*. Derajat keanggotaan tidak mensyaratkan jumlah total bernilai 1.
 
 ---
 
-## 2. Fungsi turun
+## C. Formulasi Matematis
 
-Fungsi turun berada pada interval:
+### 1. Fungsi Karakteristik Himpunan Crisp
+Misalkan semesta pembicaraan adalah $X$. Suatu himpunan crisp $A$ didefinisikan oleh fungsi karakteristik $\chi_A(x)$:
 
-```text
-15 ≤ x ≤ 20
-```
+$$\chi_A(x) = \begin{cases} 1, & \text{jika } x \in A \\ 0, & \text{jika } x \notin A \end{cases}$$
 
-Dengan titik:
+Contoh untuk penilaian *Layanan Memuaskan* dengan skala rating $1 \le x \le 5$ dan batas ambang $\theta = 4.0$:
+$$\chi_{\text{Memuaskan}}(x) = \begin{cases} 1, & x \ge 4.0 \\ 0, & x < 4.0 \end{cases}$$
 
-```text
-(x1, y1) = (15, 1)
-(x2, y2) = (20, 0)
-```
+### 2. Fungsi Keanggotaan Himpunan Fuzzy
+Pada himpunan fuzzy $A$, setiap elemen $x$ dipetakan ke dalam interval real $[0, 1]$ oleh fungsi keanggotaan $\mu_A(x)$:
 
-Gunakan persamaan garis:
+$$\mu_A(x): X \to [0, 1]$$
 
-$$
-\frac{y-1}{0-1}=\frac{x-15}{20-15}
-$$
-
-Sehingga:
-
-$$
-y = \frac{20-x}{5}
-$$
-
-Maka fungsi keanggotaan turun adalah:
-
-$$
-\boxed{\mu(x)=\frac{20-x}{5}}
-$$
+Contoh model linear naik untuk konsep *Layanan Memuaskan* pada domain $[2.5, 4.5]$:
+$$\mu_{\text{Memuaskan}}(x) = \begin{cases} 
+0, & x < 2.5 \\ 
+\dfrac{x - 2.5}{4.5 - 2.5} = \dfrac{x - 2.5}{2.0}, & 2.5 \le x \le 4.5 \\ 
+1, & x > 4.5 
+\end{cases}$$
 
 ---
 
-# D. Fungsi Keanggotaan dalam Python
-Setelah mendapatkan persamaan secara manual, persamaan tersebut diterjemahkan ke dalam fungsi Python.
+## D. Implementasi dalam Python
 
-```python
-def fungsi_remaja_naik(x):
-    return (x - 10) / 5
-
-
-def fungsi_remaja_turun(x):
-    return (20 - x) / 5
-```
-
-Contoh:
-
-```python
-print(fungsi_remaja_naik(12))
-```
-
-Hasil:
-
-```text
-0.4
-```
-
-Karena:
-
-$$
-\mu(12)=\frac{12-10}{5}=0.4
-$$
-
-Contoh lainnya:
-
-```python
-print(fungsi_remaja_turun(17))
-```
-
-Hasil:
-
-```text
-0.6
-```
-
-Karena:
-
-$$
-\mu(17)=\frac{20-17}{5}=0.6
-$$
-
----
-
-# E. Menyimpan Fungsi dalam Database
-
-Pada praktikum ini digunakan database MySQL dengan nama:
-
-```text
-fuzzy_modul1
-```
-
-Database tidak menyimpan seluruh nilai derajat keanggotaan.
-
-Database hanya menyimpan:
-
-* batas bawah interval,
-* batas atas interval,
-* fungsi yang harus digunakan.
-
-Dengan demikian database bertugas menentukan:
-
-> Nilai crisp ini berada pada interval mana dan fungsi Python mana yang harus dijalankan?
-
-# F. Membuat Database MySQL
-
-Buka MySQL atau phpMyAdmin.
-
-Jalankan:
-
-```sql
-CREATE DATABASE fuzzy_modul1;
-```
-
-Kemudian pilih database:
-
-```sql
-USE fuzzy_modul1;
-```
-
-# G. Membuat Tabel `usia_remaja`
-
-Buat tabel:
-
-```sql
-CREATE TABLE usia_remaja (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    usia_min INT NOT NULL,
-    usia_max INT NOT NULL,
-    nilai_fuzzy VARCHAR(50) NOT NULL
-);
-```
-
-Perhatikan bahwa kolom:
-
-```text
-nilai_fuzzy
-```
-
-menggunakan tipe:
-
-```text
-VARCHAR
-```
-
-karena kolom tersebut dapat berisi:
-
-```text
-0
-fungsi_remaja_naik
-fungsi_remaja_turun
-```
-
-# H. Memasukkan Data Fungsi Keanggotaan
-
-Masukkan data:
-
-```sql
-INSERT INTO usia_remaja
-(usia_min, usia_max, nilai_fuzzy)
-VALUES
-(0, 10, '0'),
-(10, 15, 'fungsi_remaja_naik'),
-(15, 20, 'fungsi_remaja_turun'),
-(20, 150, '0');
-```
-
-Periksa data:
-
-```sql
-SELECT * FROM usia_remaja;
-```
-
-Hasil:
-
-| id | usia_min | usia_max | nilai_fuzzy         |
-| -: | -------: | -------: | ------------------- |
-|  1 |        0 |       10 | 0                   |
-|  2 |       10 |       15 | fungsi_remaja_naik  |
-|  3 |       15 |       20 | fungsi_remaja_turun |
-|  4 |       20 |      150 | 0                   |
-
-
-# I. Semesta Pembicaraan
-
-Pada contoh ini, semesta pembicaraan usia dibatasi:
-
-```text
-0 ≤ usia ≤ 150
-```
-
-Artinya sistem hanya menerima usia antara 0 sampai 150 tahun.
-
-Fungsi keanggotaan:
-
-```text
-0 – 10    → 0
-10 – 15   → fungsi naik
-15 – 20   → fungsi turun
-20 – 150  → 0
-```
-
-Secara visual:
-
-```text
-μ(x)
-1.0                    ●
-                      / \
-                     /   \
-                    /     \
-                   /       \
-                  /         \
-0.0 ─────────────●───────────●────────────────
-                 10   15     20              150
-
-                 Usia
-```
-
-
-# J. Instalasi Library MySQL untuk Python
-
-Python membutuhkan library untuk berkomunikasi dengan MySQL.
-
-Buka terminal VS Code:
-
+### 1. Persiapan Lingkungan
+Pastikan pustaka `numpy` dan `matplotlib` sudah terpasang. Jalankan di terminal jika belum:
 ```bash
-pip install mysql-connector-python
+pip install numpy matplotlib
 ```
 
-Jika menggunakan Python tertentu:
-
-```bash
-python -m pip install mysql-connector-python
-```
-
-Untuk memastikan library telah terpasang:
-
-```bash
-pip show mysql-connector-python
-```
-
-# K. Membuat Koneksi Python ke MySQL
-
-Buat file:
-
-```text
-fuzzy_usia.py
-```
-
-Masukkan kode:
+### 2. Kode Program Perbandingan Crisp vs Fuzzy
+Buat file bernama `pertemuan1_crisp_vs_fuzzy.py` atau jalankan pada Jupyter Notebook:
 
 ```python
-import mysql.connector
+import numpy as np
+import matplotlib.pyplot as plt
 
-
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="PASSWORD_MYSQL_ANDA",
-    database="fuzzy_modul1"
-)
-
-print("Koneksi database berhasil!")
-
-db.close()
-```
-
-Ganti:
-
-```text
-PASSWORD_MYSQL_ANDA
-```
-
-dengan password MySQL yang digunakan pada komputer Anda.
-
-Jika MySQL tidak menggunakan password:
-
-```python
-password=""
-```
-
-
-# L. Membuat Fungsi Keanggotaan
-
-Tambahkan fungsi berikut:
-
-```python
-def fungsi_remaja_naik(x):
-    return (x - 10) / 5
-
-
-def fungsi_remaja_turun(x):
-    return (20 - x) / 5
-```
-
-Fungsi tersebut berasal dari hasil perhitungan manual.
-
-
-# M. Menghubungkan Nama Fungsi Database dengan Fungsi Python
-
-Database menyimpan nama:
-
-```text
-fungsi_remaja_naik
-```
-
-atau:
-
-```text
-fungsi_remaja_turun
-```
-
-Python harus mengetahui bahwa nama tersebut mengacu pada fungsi Python.
-
-Gunakan dictionary:
-
-```python
-fungsi = {
-    "fungsi_remaja_naik": fungsi_remaja_naik,
-    "fungsi_remaja_turun": fungsi_remaja_turun
-}
-```
-
-Dengan demikian:
-
-```text
-fungsi_remaja_naik
-        ↓
-fungsi Python fungsi_remaja_naik()
-
-fungsi_remaja_turun
-        ↓
-fungsi Python fungsi_remaja_turun()
-```
-
-# N. Membuat Fungsi Fuzzifikasi
-
-Selanjutnya buat fungsi:
-
-```python
-def fuzzifikasi_usia(x):
-
-    cursor = db.cursor()
-
-    query = """
-        SELECT usia_min, usia_max, nilai_fuzzy
-        FROM usia_remaja
-        WHERE %s >= usia_min
-        AND %s <= usia_max
+# ==========================================================
+# 1. DEFINISI FUNGSI KARAKTERISTIK CRISP
+# ==========================================================
+def crisp_memuaskan(rating, threshold=4.0):
     """
-
-    cursor.execute(query, (x, x))
-
-    data = cursor.fetchone()
-
-    cursor.close()
-
-    if data is None:
-        return None
-
-    usia_min, usia_max, nama_fungsi = data
-
-    if nama_fungsi == "0":
-        return 0
-
-    if nama_fungsi in fungsi:
-
-        fungsi_y = fungsi[nama_fungsi]
-
-        nilai = fungsi_y(x)
-
-        return nilai
-
-    raise ValueError(
-        f"Fungsi '{nama_fungsi}' belum dibuat di Python."
-    )
-```
-
-
-# O. Memahami Cara Kerja Fungsi Fuzzifikasi
-
-Misalkan:
-
-```python
-x = 17
-```
-
-Program akan mencari ke database.
-
-Query yang dijalankan secara konsep adalah:
-
-```sql
-SELECT usia_min, usia_max, nilai_fuzzy
-FROM usia_remaja
-WHERE 17 >= usia_min
-AND 17 <= usia_max;
-```
-
-Database menemukan:
-
-```text
-usia_min = 15
-usia_max = 20
-nilai_fuzzy = fungsi_remaja_turun
-```
-
-Kemudian Python mendapatkan:
-
-```python
-nama_fungsi = "fungsi_remaja_turun"
-```
-
-Python mencari fungsi:
-
-```python
-fungsi_y = fungsi[nama_fungsi]
-```
-
-yang sama dengan:
-
-```python
-fungsi_y = fungsi_remaja_turun
-```
-
-Kemudian:
-
-```python
-nilai = fungsi_y(17)
-```
-
-sama dengan:
-
-```python
-nilai = fungsi_remaja_turun(17)
-```
-
-Kemudian:
-
-$$
-\mu(17)=\frac{20-17}{5}
-$$
-
-$$
-\mu(17)=0.6
-$$
-
-
-# P. Program Lengkap
-
-Berikut program lengkap yang dapat digunakan sebagai dasar praktikum:
-
-```python
-import mysql.connector
-
-
-# ==========================================================
-# 1. KONEKSI DATABASE
-# ==========================================================
-
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="PASSWORD_MYSQL_ANDA",
-    database="fuzzy_modul1"
-)
-
-print("Koneksi database berhasil!")
-
-
-# ==========================================================
-# 2. FUNGSI KEANGGOTAAN
-# ==========================================================
-
-def fungsi_remaja_naik(x):
+    Fungsi karakteristik crisp.
+    Mengembalikan 1 jika rating >= threshold, selain itu 0.
     """
-    Fungsi keanggotaan remaja bagian naik.
+    return np.where(rating >= threshold, 1.0, 0.0)
 
-    Domain:
-    10 <= x <= 15
 
-    Persamaan:
-    μ(x) = (x - 10) / 5
+# ==========================================================
+# 2. DEFINISI FUNGSI KEANGGOTAAN FUZZY
+# ==========================================================
+def fuzzy_memuaskan(rating, a=2.5, b=4.5):
     """
-    return (x - 10) / 5
-
-
-def fungsi_remaja_turun(x):
+    Fungsi keanggotaan fuzzy linear naik.
+    - x <= a       : derajat 0
+    - a <= x <= b  : derajat (x - a) / (b - a)
+    - x >= b       : derajat 1
     """
-    Fungsi keanggotaan remaja bagian turun.
-
-    Domain:
-    15 <= x <= 20
-
-    Persamaan:
-    μ(x) = (20 - x) / 5
-    """
-    return (20 - x) / 5
+    derajat = (rating - a) / (b - a)
+    return np.clip(derajat, 0.0, 1.0)
 
 
 # ==========================================================
-# 3. DAFTAR FUNGSI
+# 3. GENERASI DATA SEMESTA PEMBICARAAN
 # ==========================================================
+# Domain rating layanan dari 1.0 sampai 5.0
+ratings = np.linspace(1.0, 5.0, 500)
 
-fungsi = {
-    "fungsi_remaja_naik": fungsi_remaja_naik,
-    "fungsi_remaja_turun": fungsi_remaja_turun
-}
-
-
-# ==========================================================
-# 4. FUNGSI FUZZIFIKASI
-# ==========================================================
-
-def fuzzifikasi_usia(x):
-
-    cursor = db.cursor()
-
-    query = """
-        SELECT usia_min, usia_max, nilai_fuzzy
-        FROM usia_remaja
-        WHERE %s >= usia_min
-        AND %s <= usia_max
-    """
-
-    cursor.execute(query, (x, x))
-
-    data = cursor.fetchone()
-
-    cursor.close()
-
-    if data is None:
-        return None
-
-    usia_min, usia_max, nama_fungsi = data
-
-    # Jika database memberikan nilai 0
-    if nama_fungsi == "0":
-        return 0
-
-    # Jika database memberikan nama fungsi
-    if nama_fungsi in fungsi:
-
-        fungsi_y = fungsi[nama_fungsi]
-
-        nilai = fungsi_y(x)
-
-        return nilai
-
-    raise ValueError(
-        f"Fungsi '{nama_fungsi}' belum dibuat di Python."
-    )
+y_crisp = crisp_memuaskan(ratings, threshold=4.0)
+y_fuzzy = fuzzy_memuaskan(ratings, a=2.5, b=4.5)
 
 
 # ==========================================================
-# 5. INPUT USIA
+# 4. VISUALISASI PERBANDINGAN
 # ==========================================================
+plt.figure(figsize=(10, 5))
 
-usia = float(input("Masukkan usia: "))
+# Plot Logika Crisp
+plt.step(ratings, y_crisp, label='Crisp (Threshold = 4.0)', 
+         color='#d9534f', linewidth=2.5, where='post')
 
+# Plot Logika Fuzzy
+plt.plot(ratings, y_fuzzy, label='Fuzzy (Linear Naik [2.5, 4.5])', 
+         color='#0275d8', linewidth=2.5)
 
-# ==========================================================
-# 6. PROSES FUZZIFIKASI
-# ==========================================================
+# Penanda titik batas kritis
+plt.axvline(x=3.9, color='gray', linestyle='--', alpha=0.7)
+plt.axvline(x=4.0, color='gray', linestyle='--', alpha=0.7)
+plt.scatter([3.9, 4.0], [crisp_memuaskan(3.9), crisp_memuaskan(4.0)], 
+            color='#d9534f', zorder=5, s=60)
+plt.scatter([3.9, 4.0], [fuzzy_memuaskan(3.9), fuzzy_memuaskan(4.0)], 
+            color='#0275d8', zorder=5, s=60)
 
-nilai_keanggotaan = fuzzifikasi_usia(usia)
+plt.title('Perbandingan Logika Crisp vs Logika Fuzzy: Kategori "Layanan Memuaskan"', fontsize=13, fontweight='bold')
+plt.xlabel('Rating Pengguna (Skala 1 - 5)', fontsize=11)
+plt.ylabel('Derajat Keanggotaan / Nilai Kebenaran', fontsize=11)
+plt.ylim(-0.05, 1.1)
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.legend(loc='upper left', fontsize=10)
+plt.tight_layout()
 
-
-# ==========================================================
-# 7. MENAMPILKAN HASIL
-# ==========================================================
-
-print()
-print("================================")
-print("HASIL FUZZIFIKASI")
-print("================================")
-print(f"Usia               : {usia}")
-print(f"Keanggotaan remaja : {nilai_keanggotaan}")
-print("================================")
-
-
-# ==========================================================
-# 8. MENUTUP DATABASE
-# ==========================================================
-
-db.close()
+# Simpan dan tampilkan grafik
+plt.savefig('visualisasi_crisp_vs_fuzzy.png', dpi=300)
+plt.show()
 ```
 
 ---
 
-# Q. Pengujian Program
+## E. Analisis Kondisi Batas (*Boundary Sensitivity*)
 
-Lakukan pengujian menggunakan beberapa nilai usia.
+Mari amati output program untuk dua nilai rating yang sangat berdekatan di sekitar ambang batas $4.0$:
 
-## Pengujian 1
+```python
+test_values = [3.8, 3.9, 3.99, 4.0, 4.01, 4.2]
 
-Input:
-
-```text
-5
+print(f"{'Rating':<8} | {'Crisp':<8} | {'Fuzzy mu(x)':<12} | {'Interpretasi Fuzzy'}")
+print("-" * 55)
+for val in test_values:
+    c_val = float(crisp_memuaskan(val))
+    f_val = float(fuzzy_memuaskan(val))
+    interpretasi = f"Tingkat pemenuhan {f_val*100:.1f}%"
+    print(f"{val:<8.2f} | {c_val:<8.1f} | {f_val:<12.3f} | {interpretasi}")
 ```
 
-Database menemukan:
-
+### Hasil Eksekusi:
 ```text
-0 – 10 → 0
+Rating   | Crisp    | Fuzzy mu(x)  | Interpretasi Fuzzy
+-------------------------------------------------------
+3.80     | 0.0      | 0.650        | Tingkat pemenuhan 65.0%
+3.90     | 0.0      | 0.700        | Tingkat pemenuhan 70.0%
+3.99     | 0.0      | 0.745        | Tingkat pemenuhan 74.5%
+4.00     | 1.0      | 0.750        | Tingkat pemenuhan 75.0%
+4.01     | 1.0      | 0.755        | Tingkat pemenuhan 75.5%
+4.20     | 1.0      | 0.850        | Tingkat pemenuhan 85.0%
 ```
 
-Hasil:
-
-```text
-μ(5) = 0
-```
+> [!WARNING]
+> **Kelemahan Logika Crisp:**
+> Perubahan sekecil $0.01$ dari $3.99$ ke $4.00$ menyebabkan perubahan ekstrem dari $0.0$ (Ditolak / Tidak Memuaskan) menjadi $1.0$ (Diterima / Memuaskan). Pada sistem penilaian beasiswa, penentuan tiket prioritas, atau alarm kebakaran, kondisi ini memicu anomali keputusan diskriminatif pada data di sekitar batas ambang.
 
 ---
 
-## Pengujian 2
+## F. Praktikum Mandiri di Laboratorium
 
-Input:
-
-```text
-12
-```
-
-Database menemukan:
-
-```text
-10 – 15 → fungsi_remaja_naik
-```
-
-Python menghitung:
-
-$$
-\mu(12)=\frac{12-10}{5}
-$$
-
-Hasil:
-
-```text
-μ(12) = 0.4
-```
+Ikuti langkah-langkah berikut:
+1. Buka VS Code / Jupyter Lab dan buat file script Python baru.
+2. Ketik dan jalankan program visualisasi di atas.
+3. Modifikasi fungsi keanggotaan fuzzy agar menggunakan bentuk **Sigmoid** sederhana:
+   $$\mu(x) = \frac{1}{1 + e^{-k(x - x_0)}}$$
+   di mana $x_0$ adalah titik tengah (misal $3.5$) dan $k$ adalah kecuraman lereng (misal $2.0$).
+4. Gambarkan grafik kurva Sigmoid tersebut berdampingan dengan kurva linear naik dan kurva crisp.
 
 ---
 
-## Pengujian 3
+## G. Tugas Praktikum 1
 
-Input:
+### Kasus: Sistem Prioritas Tiket Helpdesk TI
+Departemen Dukungan TI mengelompokkan waktu tunggu penyelesaian tiket (dalam satuan jam, semesta pembicaraan $0 \le x \le 24$ jam) ke dalam kategori **"Kritis / Butuh Eskalasi Cepat"**.
 
-```text
-17
-```
-
-Database menemukan:
-
-```text
-15 – 20 → fungsi_remaja_turun
-```
-
-Python menghitung:
-
-$$
-\mu(17)=\frac{20-17}{5}
-$$
-
-Hasil:
-
-```text
-μ(17) = 0.6
-```
+1. **Rancang Logika Crisp:**
+   - Tetapkan batas kaku waktu tunggu $\ge 8$ jam sebagai tiket kritis.
+2. **Rancang Logika Fuzzy:**
+   - Tentukan interval transisi, misalnya:
+     - Waktu $< 4$ jam: derajat kritis $= 0$
+     - $4 \le x \le 12$ jam: derajat kritis naik secara linear
+     - Waktu $> 12$ jam: derajat kritis $= 1$
+   - Turunkan persamaan matematikanya secara manual.
+3. **Implementasikan dalam Python:**
+   - Buat fungsi Python untuk menghitung kedua representasi.
+   - Lakukan pengujian untuk data: $2, 4, 6, 7.9, 8.0, 8.1, 10, 12, 16, 24$ jam.
+   - Buat tabel perbandingannya.
+4. **Visualisasikan:**
+   - Simpan grafik komparasi dalam format PNG.
 
 ---
 
-## Pengujian 4
+## H. Pertanyaan Analisis
 
-Input:
+Jawab pertanyaan-pertanyaan berikut secara analitis dan sertakan dalam laporan praktikum Anda:
 
-```text
-25
-```
-
-Database menemukan:
-
-```text
-20 – 150 → 0
-```
-
-Hasil:
-
-```text
-μ(25) = 0
-```
+1. Jelaskan mengapa pendekatan logika crisp dinilai kurang adil jika diterapkan pada sistem penilaian kinerja dosen atau penentuan penerima bantuan sosial!
+2. Jika suatu nilai suhu memiliki derajat keanggotaan $\mu_{\text{Panas}} = 0.7$ dan $\mu_{\text{Hangat}} = 0.4$, apakah hal ini melanggar kaidah probabilitas? Jelaskan perbedaannya!
+3. Pada kondisi lingkungan nyata yang penuh derau (*noisy sensors*), mengapa logika fuzzy menghasilkan keputusan yang jauh lebih stabil dibandingkan percabangan `if-else` konvensional?
+4. Jelaskan apa yang dimaksud dengan semesta pembicaraan (*universe of discourse*) dan sebutkan contohnya pada sistem monitoring lalu lintas jaringan komputer!
 
 ---
 
-# R. Tugas Praktikum
-
-Buat fungsi fuzzy untuk semua variabel usia yang ada pada Tugas 1 Anda, lakukan pengembangan berikut.
-
-## Tugas Praktikum 1 — Verifikasi Fungsi
-
-Hitung secara manual nilai keanggotaan --> Sudah dilakukan pada Tugas 1.
-Buat tabel berdasarkan jumlah variabel usia ke dalam database
-Jalankan program dengan minimal **2 usia di setiap variabel usia** yang berbeda.
-
-Catat hasilnya:
-
-| No | Input Usia | Interval Database | Fungsi | μ(x) |
-| -: | ---------: | ----------------- | ------ | ---: |
-|  1 |            |                   |        |      |
-|  2 |            |                   |        |      |
-|  3 |            |                   |        |      |
-|  4 |            |                   |        |      |
-|  5 |            |                   |        |      |
-|  6 |            |                   |        |      |
-|  7 |            |                   |        |      |
-|  8 |            |                   |        |      |
-|  9 |            |                   |        |      |
-| 10 |            |                   |        |      |
+## I. Ketentuan Pengumpulan
+1. Mahasiswa mengunggah source code Python (`.py` atau `.ipynb`) beserta hasil grafik visualisasi ke repositori GitHub masing-masing.
+2. Format penamaan file: `Modul-1/Praktikum1_<NIM>_<Nama>.ipynb` atau `.py`.
+3. Commit pesan git harus deskriptif, contoh: `feat(modul1): selesaikan tugas praktikum 1 crisp vs fuzzy`.
 
 ---
 
-# S. Pertanyaan Analisis
-
-Jawab pertanyaan berikut.
-
-### 1. Mengapa database tidak menyimpan semua nilai derajat keanggotaan?
-
-### 2. Apa fungsi dari kolom:
-
-```text
-usia_min
-```
-
-### 3. Apa fungsi dari kolom:
-
-```text
-usia_max
-```
-
-### 4. Mengapa `nilai_fuzzy` menggunakan tipe data `VARCHAR`?
-
-### 5. Apa yang terjadi ketika nilai crisp `17` diberikan kepada program?
-
-Jelaskan prosesnya mulai dari:
-
-```text
-Input → Database → Fungsi Python → Hasil
-```
-
-### 6. Apa yang terjadi jika database memberikan:
-
-```text
-fungsi_remaja_turun
-```
-
-tetapi fungsi tersebut tidak dibuat di Python?
-
-### 7. Mengapa pada praktikum ini tidak digunakan library SEPERTI `scikit-fuzzy`?
-
-### 8. Apa hubungan antara persamaan garis lurus yang dihitung secara manual dengan fungsi Python?
-
-
-# U. Ketentuan Praktikum
-
-1. Persamaan fungsi harus dihitung **secara manual terlebih dahulu**.
-2. Mahasiswa wajib menunjukkan proses mendapatkan persamaan.
-3. Tidak diperbolehkan menggunakan `scikit-fuzzy` untuk menghitung fungsi keanggotaan.
-4. Fungsi keanggotaan harus dibuat sendiri menggunakan Python.
-5. Database harus menggunakan MySQL.
-6. Program harus mengambil informasi interval dari database.
-7. Program harus menentukan fungsi berdasarkan data dari database.
-8. Program harus mengeksekusi fungsi Python yang sesuai.
-9. Hasil program harus dibandingkan dengan hasil perhitungan manual.
-10. Setiap mahasiswa harus dapat menjelaskan alur:
-
-```text
-Nilai Crisp
-    ↓
-Database
-    ↓
-Interval
-    ↓
-Nama Fungsi
-    ↓
-Fungsi Python
-    ↓
-Nilai Keanggotaan μ(x)
-```
-
-# V. Kesimpulan
-
-Pada praktikum ini, mahasiswa membangun proses fuzzifikasi sederhana tanpa menggunakan library fuzzy.
-
-Konsep utama yang harus dipahami adalah:
-
-```text
-Persamaan Matematika
-        ↓
-Fungsi Python
-        ↓
-Database menyimpan interval
-        ↓
-Database menentukan fungsi
-        ↓
-Python mengeksekusi fungsi
-        ↓
-Derajat Keanggotaan
-```
-
-Database **tidak menggantikan fungsi Python**.
-
-Database berperan sebagai sumber informasi untuk menentukan:
-
-> **"Untuk nilai crisp ini, fungsi keanggotaan yang mana yang harus digunakan?"**
-
-Sedangkan Python berperan sebagai:
-
-> **"Mesin yang menjalankan persamaan fungsi tersebut."**
-tanpa mengubah prinsip dasarnya.
-
+## J. Kesimpulan
+Pada praktikum pertama ini, Anda telah mempelajari bahwa logika fuzzy bukan pengganti logika biner, melainkan superset yang memungkinkan komputasi dengan bahasa manusia (*computing with words*). Transisi bertahap pada derajat keanggotaan $[0, 1]$ menjadi fondasi penting untuk merancang sistem pendukung keputusan yang luwes dan andal terhadap ketidakpastian informasi.
