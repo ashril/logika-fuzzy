@@ -22,11 +22,16 @@ Setelah menyelesaikan praktikum ini, mahasiswa diharapkan mampu:
 ### 1. Masalah Pengambilan Keputusan dalam Kondisi Ketidakpastian
 Dalam dunia nyata, khususnya pada bidang Teknologi Informasi, parameter sistem sering kali tidak dapat dikelompokkan secara kaku (*black-and-white*). Perhatikan contoh permasalahan berikut:
 - **Waktu Respons Server (*Response Time*):** Apakah waktu respons 3.9 detik dikategorikan *Cepat* atau *Lambat* jika ambang batas kaku ditetapkan pada 4.0 detik?
-- **Suhu Ruang Server (*Data Center Temperature*):** Jika batas dingin adalah $$\le 20^\circ\text{C}$$, apakah $$20.1^\circ\text{C}$$ otomatis dianggap *Panas*?
+- **Suhu Ruang Server (*Data Center Temperature*):** Jika batas dingin adalah
+  $$\le 20^\circ\text{C}$$
+  , apakah
+  $$20.1^\circ\text{C}$$
+  otomatis dianggap *Panas*?
 - **Kualitas Layanan (*Quality of Service - QoS*):** Penilaian pengguna mengenai antarmuka aplikasi sering kali dinyatakan dengan ungkapan linguistik: *"sangat memuaskan"*, *"cukup baik"*, atau *"agak lambat"*.
 
 Pendekatan konvensional menggunakan **Logika Crisp (Boolean)** yang hanya mengenal dua keadaan diskrit:
 $$\text{Nilai Keanggotaan} \in \{0, 1\} \quad (\text{SALAH / BENAR})$$
+
 
 Sebaliknya, **Logika Fuzzy**, yang diperkenalkan oleh **Prof. Lotfi A. Zadeh pada tahun 1965** di University of California, Berkeley, memperluas konsep tersebut sehingga suatu nilai dapat memiliki keanggotaan bertingkat:
 $$\text{Derajat Keanggotaan } \mu_A(x) \in [0, 1]$$
