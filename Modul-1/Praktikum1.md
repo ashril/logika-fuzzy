@@ -79,7 +79,8 @@ $$
 
 Contoh untuk penilaian *Layanan Memuaskan* dengan skala rating $1 \le x \le 5$ dan batas ambang $\theta = 4.0$:
 $$
-\chi_{\text{Memuaskan}}(x) = \begin{cases} 
+\chi_{\text{Memuaskan}}(x) = 
+\begin{cases} 
 1, & x \ge 4.0 \\ 
 0, & x < 4.0 
 \end{cases}
@@ -92,9 +93,11 @@ $$\mu_A(x): X \to [0, 1]$$
 
 Contoh model linear naik untuk konsep *Layanan Memuaskan* pada domain $[2.5, 4.5]$:
 $$
-\mu_{\text{Memuaskan}}(x) = \begin{cases} 
+\mu_{\text{Memuaskan}}(x) = 
+\begin{cases} 
 0, & x < 2.5 \\ 
-\dfrac{x - 2.5}{4.5 - 2.5} = \dfrac{x - 2.5}{2.0}, & 2.5 \le x \le 4.5 \\ 
+\dfrac{x - 2.5}{4.5 - 2.5} = 
+\dfrac{x - 2.5}{2.0}, & 2.5 \le x \le 4.5 \\ 
 1, & x > 4.5 
 \end{cases}
 $$
