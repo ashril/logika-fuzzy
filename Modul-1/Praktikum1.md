@@ -93,6 +93,7 @@ Pada himpunan fuzzy $A$, setiap elemen $x$ dipetakan ke dalam interval real $[0,
 $$\mu_A(x): X \to [0, 1]$$
 
 Contoh model linear naik untuk konsep *Layanan Memuaskan* pada domain $[2.5, 4.5]$:
+
 $$
 \mu_{\text{Memuaskan}}(x) = 
 \begin{cases} 
