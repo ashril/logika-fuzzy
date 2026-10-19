@@ -170,10 +170,10 @@ modul-logika-fuzzy/
 ---
 
 ## Materi
-Modul 1: https://docs.google.com/presentation/d/1IDml4TZk8N3QNPjQ_1Jd1rsZPT4u5UHhKjLl55CulXU/edit?usp=sharing
-Modul 2: https://docs.google.com/presentation/d/1j45vgNx8R-nMKXgzfGKM63UHugjy-uPzJnsRlvaId1g/edit?usp=sharing
-Modul 2-lanjutan: https://docs.google.com/presentation/d/1O-bCx12LXBQ-M_JOxDwdoHYYfBuZ7rhl_ffmsoAaafk/edit?usp=sharing
-Modul 3: https://docs.google.com/presentation/d/1-o8gcaJrK8qJXi1LLHMb8inDX2zNJwwPf5kTnDCZhbI/edit?usp=sharing
+### Modul 1: https://docs.google.com/presentation/d/1IDml4TZk8N3QNPjQ_1Jd1rsZPT4u5UHhKjLl55CulXU/edit?usp=sharing
+### Modul 2: https://docs.google.com/presentation/d/1j45vgNx8R-nMKXgzfGKM63UHugjy-uPzJnsRlvaId1g/edit?usp=sharing
+### Modul 2-lanjutan: https://docs.google.com/presentation/d/1O-bCx12LXBQ-M_JOxDwdoHYYfBuZ7rhl_ffmsoAaafk/edit?usp=sharing
+### Modul 3: https://docs.google.com/presentation/d/1-o8gcaJrK8qJXi1LLHMb8inDX2zNJwwPf5kTnDCZhbI/edit?usp=sharing
 
 ## 📄 Lisensi
 
